@@ -4,7 +4,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#if defined(__unix__) || defined(__APPLE__)
+#   include <unistd.h>
+#endif
 
 static uint8_t *readfile(const char *fname, size_t *size)
 {

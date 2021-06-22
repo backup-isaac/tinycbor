@@ -28,7 +28,9 @@ cmake_minimum_required(VERSION 3.10)
 
 option(build_tools "Build the cbor tools. Note: This will install the cjson library as a dependency" OFF)
 
-add_library(tinycbor
+set(tinycbor_SOURCES)
+list(
+    APPEND tinycbor_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/cborencoder.c
     ${CMAKE_CURRENT_LIST_DIR}/src/cborencoder_close_container_checked.c
     ${CMAKE_CURRENT_LIST_DIR}/src/cborerrorstrings.c
@@ -38,8 +40,19 @@ add_library(tinycbor
     ${CMAKE_CURRENT_LIST_DIR}/src/cborpretty_stdio.c
     ${CMAKE_CURRENT_LIST_DIR}/src/cbortojson.c
     ${CMAKE_CURRENT_LIST_DIR}/src/cborvalidation.c
-    ${CMAKE_CURRENT_LIST_DIR}/src/open_memstream.c
 )
+
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    add_definitions(-DWITHOUT_OPEN_MEMSTREAM)
+    message(
+        WARNING
+        "funopen and fopencookie unavailable, open_memstream can not be implemented and conversion to JSON will not work properly!"
+    )
+else()
+    list(APPEND tinycbor_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/open_memstream.c)
+endif()
+
+add_library(tinycbor ${tinycbor_SOURCES})
 
 target_include_directories(tinycbor
     PUBLIC
